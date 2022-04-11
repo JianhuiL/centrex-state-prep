@@ -245,3 +245,28 @@ def Ez_from_csv(
 
     return Ez_interp
 
+def E_field_tanh(x, z0=0, V=30e3, l = 1):
+    """
+    calculates the electric field along trajectory thatd decays in a tanh fashion
+    """
+    z = x[2]
+    mag_E = V* (1- np.tanh((z - z0)/l))
+    
+    E = np.zeros(x.shape)
+
+    E[2] = mag_E
+    
+    return E
+
+def E_field_tanhi(x, z0=0, V=30e3, l = 1):
+    """
+    calculates the electric field along trajectory thatd increase in a tanh fashion
+    """
+    z = x[2]
+    mag_E = 0.5* V* (1 + np.tanh((z - z0)/l))
+    
+    E = np.zeros(x.shape)
+
+    E[2] = mag_E
+    
+    return E

@@ -95,3 +95,29 @@ class MagneticField(StaticField):
         ax.set_ylabel("Magnetic field / G")
         ax.set_title("Magnetic field experienced by molecule over time")
         ax.legend()
+
+def Bx_field_tanh(x, x0=0, B0=30e3, l = 1):
+    """
+    calculates the electric field along trajectory thatd decays in a tanh fashion
+    """
+    z = x[2]
+    mag_B = 0.5*B0*(1 + (np.tanh((z - x0)/l)))
+    
+    B = np.zeros(x.shape)
+
+    B[0] = mag_B
+    
+    return B
+
+def Bx_field_tanh_decay(x, x0=0, B0=30e3, l = 1):
+    """
+    calculates the electric field along trajectory thatd decays in a tanh fashion
+    """
+    z = x[2]
+    mag_B = 0.5 * B0 * (1 - (np.tanh((z - x0)/l)))
+    
+    B = np.zeros(x.shape)
+
+    B[0] = mag_B
+    
+    return B

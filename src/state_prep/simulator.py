@@ -48,7 +48,7 @@ class SimulationResult:
 
     def __post_init__(self):
         # Generate array of positions
-        self.z_array = self.t_array * self.trajectory.Vini[2] + self.trajectory.Rini[2]
+        self.z_array = self.t_array * self.trajectory.Vini[0] + self.trajectory.Rini[0]
 
     def plot_state_probability(
         self,
@@ -142,7 +142,7 @@ class SimulationResult:
         label = (
             state.remove_small_components(tol=0.5).normalize().make_real().__repr__()
         )
-        ax.plot(self.t_array / 1e-6, energies / (2 * np.pi / 1e3), label=label)
+        ax.plot(self.t_array / 1e-6, energies / (2 * np.pi * 1e3), label=label)
         ax.set_xlabel(r"Time / $\mu$s")
         ax.set_ylabel("Energy / kHz")
 
