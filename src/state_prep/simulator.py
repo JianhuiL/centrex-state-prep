@@ -142,7 +142,7 @@ class SimulationResult:
         label = (
             state.remove_small_components(tol=0.5).normalize().make_real().__repr__()
         )
-        ax.plot(self.t_array / 1e-6, energies / (2 * np.pi / 1e3), label=label)
+        ax.plot(self.t_array / 1e-6, energies / (2 * np.pi * 1e3), label=label)
         ax.set_xlabel(r"Time / $\mu$s")
         ax.set_ylabel("Energy / kHz")
 
