@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
-from scipy import constants
+from scipy import constants, signal
 
 from .core import StaticField
 from .trajectory import Trajectory
@@ -140,6 +140,31 @@ def linear_E_field(x, z0=0, E0=200, k=100, n=np.array((0, 0, 1))):
 
     return E
 
+def random_E_field(x, axis = 0, n = np.array((0,0,1)), k = 0.1, E0 = 200):
+
+    z = x[axis]
+    y = np.random.random(z.shape)
+    E_vector = (np.ones(z.shape) + k * y)
+    E = n * E0 * E_vector
+
+    return E
+
+def varying_E_field(x, axis = 0, n = np.array((0,0,1)), k = 0.1, E0 = 200, l = 1e-3, random = np.zeros((600,6))):
+
+    z = x[axis]
+    count = 0
+    y = np.zeros(z.shape)
+    for d in np.linspace(10,11,60):
+        y =+ ( ( random[count,0]-0.5) *(np.cos(z/(d*l) + np.pi*(random[count,1]-0.5)/(d*l)))  +  
+        (random[count,2]-0.5) *(np.sin(z/(d*l) + np.pi*(random[count,3]-0.5)/(d*l))) +
+        (random[count,4]-0.5) *(np.tanh(z/(d*l) + np.pi*(random[count,5]-0.5)/(d*l))) )
+        count += 1
+
+    E_vector = (np.ones(z.shape) + k * y)
+
+    E = n * E0 * E_vector
+
+    return E
 
 def E_field_lens(x, z0=0, V=3e4, R=1.75 * 0.0254 / 2, L=0.60, l=20e-3):
     """
