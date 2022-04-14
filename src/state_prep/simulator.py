@@ -48,7 +48,7 @@ class SimulationResult:
 
     def __post_init__(self):
         # Generate array of positions
-        self.z_array = self.t_array * self.trajectory.Vini[2] + self.trajectory.Rini[2]
+        self.z_array = self.t_array * self.trajectory.Vini[0] + self.trajectory.Rini[0]
 
     def plot_state_probability(
         self,
