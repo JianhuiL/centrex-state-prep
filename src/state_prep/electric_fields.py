@@ -117,7 +117,7 @@ class ElectricField(StaticField):
             return z_array, Es, ax
 
 
-def linear_E_field(x, z0=0, E0=200, k=100, n=np.array((0, 0, 1))):
+def linear_E_field(x,axis = 2, z0=0, E0=200, k=100, n=np.array((0, 0, 1))):
     """
     Function that gives the electric due to an electric field that varies linearly along z.
     
@@ -133,7 +133,7 @@ def linear_E_field(x, z0=0, E0=200, k=100, n=np.array((0, 0, 1))):
     """
 
     # Determine z-position
-    z = x[2]
+    z = x[axis]
 
     # Calculate electric field
     E = n * (k * (z - z0) + E0)
@@ -149,17 +149,17 @@ def random_E_field(x, axis = 0, n = np.array((0,0,1)), k = 0.1, E0 = 200):
 
     return E
 
-def varying_E_field(x, axis = 0, n = np.array((0,0,1)), k = 0.1, E0 = 200, l = 1e-3, random = np.zeros((600,6))):
+def varying_E_field(x, axis = 0, n = np.array((0,0,1)), k = 0.1, E0 = 200, l = 1e-3, random = np.zeros((500,6)), dcount = 500):
 
     z = x[axis]
     count = 0
     y = np.zeros(z.shape)
-    for d in np.linspace(10,11,60):
-        y =+ ( ( random[count,0]-0.5) *(np.cos(z/(d*l) + np.pi*(random[count,1]-0.5)/(d*l)))  +  
-        (random[count,2]-0.5) *(np.sin(z/(d*l) + np.pi*(random[count,3]-0.5)/(d*l))) +
-        (random[count,4]-0.5) *(np.tanh(z/(d*l) + np.pi*(random[count,5]-0.5)/(d*l))) )
+    for d in np.linspace(10,15,dcount):
+        y += ((np.cos(z/(d*l) + np.pi*(random[count,1]-0.5)/(d*l)))  -  
+        ((np.sin(z/(d*l) + np.pi*(random[count,3]-0.5)/(d*l))) ) )
+        #(random[count,4]-0.5) *(np.tanh(z/(d*l) + np.pi*(random[count,5]-0.5)/(d*l))) )
         count += 1
-
+    y = y/(2*dcount)
     E_vector = (np.ones(z.shape) + k * y)
 
     E = n * E0 * E_vector
@@ -270,12 +270,23 @@ def Ez_from_csv(
 
     return Ez_interp
 
-def E_field_tanh(x, z0=0, V=30e3, l = 1):
+def E_field_tanh(x, z0=0, axis = 2, n = 2, V=30e3, l = 1, decrease = True):
     """
-    calculates the electric field along trajectory thatd decays in a tanh fashion
+    calculates the electric field along trajectory that decays/increase in a tanh fashion
+    x =  position in meters,
+    z0 = origin of the tanh fucntion,
+    axis = axis in which the E field magnitude is changing,
+    n = axis of E-field vector (0=x, 1=y, 2=z)
+    l = decay length
+    decrease = true -> decreasing function, false: increasing function
     """
-    z = x[2]
-    mag_E = V* (1- np.tanh((z - z0)/l))
+    z = x[axis]
+
+    if decrease:
+        mag_E = V* (1- np.tanh((z - z0)/l))
+
+    else:
+        mag_E = V* np.tanh((z-z0)/l)
     
     E = np.zeros(x.shape)
 
@@ -283,15 +294,36 @@ def E_field_tanh(x, z0=0, V=30e3, l = 1):
     
     return E
 
-def E_field_tanhi(x, z0=0, V=30e3, l = 1):
+def poly_field_fit(pos_data, field_data, order = 10, step_size = 5000):
     """
-    calculates the electric field along trajectory thatd increase in a tanh fashion
+    Fits a polynomial function to the simulated field, returns fit parameters and plots comparing fit and data.
+    pos_data = position from data, be sure to match simulation with fit position!
+    field_data = field magnitude from data,
+    order = order of polynomial fit,
+    step_size = positional step size for plotting
     """
-    z = x[2]
-    mag_E = 0.5* V* (1 + np.tanh((z - z0)/l))
-    
-    E = np.zeros(x.shape)
+    fit_func = 0
+    fit_para = np.polyfit(pos_data, field_data, order)
+    x = np.linspace(pos_data[0],pos_data[-1], step_size)
+    for d in range(order+1):
+        fit_func += fit_para[d]*x**(order-d)
 
-    E[2] = mag_E
-    
-    return E
+    return fit_para, plt.plot(x, fit_func, label = 'fit'),plt.plot(pos_data,field_data,label = 'data'), plt.legend()
+
+
+def fitted_E_field(x, parameters, n = np.array([0,0,1]), axis = 2):
+    """
+    Makes a electric field by fitting the simulated field to a polynomial, be sure to match the simulation trajectory with fit position!
+    x = position,
+    parameters = polynomial fit parameters, can be called from electric_fields.poly_field_fit,
+    n = electric field vector axis
+    axis = axis of molecule trajectory
+    """
+    z = x[axis]
+    fit_func = 0
+    order = len(parameters) - 1
+    for d in range(order + 1):
+        fit_func += parameters[d]*z**(order-d)
+
+    E0 = n * fit_func
+    return E0

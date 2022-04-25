@@ -66,7 +66,7 @@ class SimulationResult:
 
         probs = self.get_state_probability(state, initial_state)
         label = (
-            state.remove_small_components(tol=0.5).normalize().make_real().__repr__()
+            state.remove_small_components(tol=0.000001).normalize().make_real().__repr__()
         )
         if position:
             ax.plot(self.z_array / 1e-2, probs, label=label)
@@ -88,7 +88,7 @@ class SimulationResult:
         if ax is None:
             fig, ax = plt.subplots()
         for state in states:
-            self.plot_state_probability(state, initial_state, ax=ax, position=position)
+            self.plot_state_probability(state, initial_state, ax=ax, position=position, )
 
     def get_state_probability(
         self, state: centrex_TlF.State, initial_state: centrex_TlF.State, ax=None
