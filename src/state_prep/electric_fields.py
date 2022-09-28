@@ -77,6 +77,37 @@ class ElectricField(StaticField):
         a given trajectory over time.
         """
         return lambda t: self.get_E_R(R_t(t))
+        
+    def plotaxis(self, trajectory: Trajectory, ax=None, position=False, axis = 2):
+        """
+        Plots the electric field along the given trajectory
+        """
+        E_t = self.get_E_t_func(trajectory.R_t)
+        T = trajectory.get_T()
+
+        t_array = np.linspace(0, T, 1000)
+
+        Es = np.array([E_t(t) for t in t_array])
+
+        if not ax:
+            fig, ax = plt.subplots()
+
+        if not position:
+            ax.plot(t_array / 1e-6, Es[:, axis])
+            ax.set_xlabel(r"Time / $\mu$s")
+            ax.set_ylabel("Electric field / V/cm")
+            ax.set_title("Electric field experienced by molecule over time")
+
+            return t_array, Es, ax
+
+        else:
+            z_array = np.array([trajectory.R_t(t)[2] for t in t_array])
+
+            ax.plot(z_array / 1e-2, Es[:, axis])
+            ax.set_xlabel(r"Z-position / cm")
+            ax.set_ylabel("Electric field / V/cm")
+            ax.set_title("Electric field experienced by molecule over position")
+            return z_array, Es, ax
 
     def plot(self, trajectory: Trajectory, ax=None, position=False):
         """
@@ -302,14 +333,14 @@ def E_field_tanh(x, z0=0, axis = 2, n = 2, V=30e3, l = 1, decrease = True):
     z = x[axis]
 
     if decrease:
-        mag_E = V* (1- np.tanh((z - z0)/l))
+        mag_E = V/2* (1- np.tanh((z - z0)/l))
 
     else:
-        mag_E = V* np.tanh((z-z0)/l)
+        mag_E = V/2*(np.tanh((z-z0)/l)) + V/2
     
     E = np.zeros(x.shape)
 
-    E[2] = mag_E
+    E[n] = mag_E
     
     return E
 

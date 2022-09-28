@@ -220,7 +220,9 @@ class MicrowaveField:
         # Determine what power is required (Omega \propto sqrt(Power))
         power_req = (Omega / Omega1W) ** 2
 
-        self.intensity.power = power_req
+        return power_req
+
+        # self.intensity.power = power_req
 
     def set_frequency(self, freq: float) -> None:
         """
